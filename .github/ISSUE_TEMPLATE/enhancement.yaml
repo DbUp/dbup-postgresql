@@ -1,0 +1,27 @@
+name: 🆕 Enhancement
+description: Suggest a new feature or enhancement
+title: "Something new"
+labels: ["enhancement", "triage"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing open and closed issues
+        required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: Sell us the enhancement
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: What is the impact? 
+      description: How will this impact existing users? Is this a breaking change? Is this a common or edge use case?
+      placeholder: Describe the impact this enhancement would have
+    validations:
+      required: true

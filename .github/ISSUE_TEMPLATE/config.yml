@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: DbUp Core Issue Repo
+    url: https://github.com/DbUp/DbUp/issues
+    about: If the issue or bug is not specific to this provider raise an issue in the main repo
+  - name: DbUp Documentation
+    url: https://dbup.readthedocs.io/
+  - name: StackOverflow DbUp tag
+    url: https://stackoverflow.com/questions/tagged/dbup
+    about: For "How do I" questions, please post on StackOverflow

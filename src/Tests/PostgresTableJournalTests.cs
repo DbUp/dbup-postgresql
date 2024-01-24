@@ -2,6 +2,9 @@
 using System.Data;
 using DbUp.Engine;
 using DbUp.Engine.Output;
+using DbUp.Tests.Common;
+using NSubstitute;
+using Shouldly;
 using Xunit;
 
 namespace DbUp.Postgresql.Tests;

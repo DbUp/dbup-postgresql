@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>DbUp makes it easy to deploy and upgrade SQL Server databases. This package adds PostgreSQL support.</Description>
+    <Title>DbUp PostgreSQL Support</Title>
+    <Company>DbUp Contributors</Company>
+    <Product>DbUp</Product>
+    <Copyright>Copyright © DbUp Contributors 2015</Copyright>
+    <TargetFrameworks>netstandard1.3;netstandard2.0;net462</TargetFrameworks>
+    <AssemblyName>dbup-postgresql</AssemblyName>
+    <RootNamespace>DbUp.Postgresql</RootNamespace>
+    <PackageId>dbup-postgresql</PackageId>
+    <AssemblyOriginatorKeyFile>../dbup.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <RepositoryUrl>https://github.com/DbUp/dbup-postgresql.git</RepositoryUrl>
+    <PackageIcon>dbup-icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dbup-core" Version="5.0.37"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Visible="false" Include="../dbup-icon.png" Pack="True" PackagePath=""/>
+  </ItemGroup>
+
+</Project>

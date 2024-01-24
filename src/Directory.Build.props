@@ -3,10 +3,10 @@
 
   <PropertyGroup>
     <Authors>https://github.com/orgs/DbUp/people</Authors>
-    <PackageReleaseNotes>https://github.com/DbUp/dbup-newprovider/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/DbUp/dbup-postgresql/releases</PackageReleaseNotes>
     <PackageProjectUrl>https://dbup.github.io</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/dbup-newprovider/dbup-newprovider.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dbup-postgresql/dbup-postgresql.git</RepositoryUrl>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>

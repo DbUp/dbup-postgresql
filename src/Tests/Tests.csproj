@@ -3,19 +3,16 @@
   <PropertyGroup>
     <TargetFrameworks>net462;net8</TargetFrameworks>
     <AssemblyName>Tests</AssemblyName>
-    <RootNamespace>DbUp.NewProvider.Tests</RootNamespace>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>DbUp.Postgresql.Tests</RootNamespace>
     <!--    <ImplicitUsings>enable</ImplicitUsings> Can't use implict usings with net46 -->
     <Nullable>enable</Nullable>
-    <NoWarn>$(NoWarn);NETSDK1138</NoWarn> <!-- Purposefully leaving an old version of netcoreapp to ensure we have compatibility. This never gets published -->
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dbup-newprovider\dbup-newprovider.csproj" />
-    <PackageReference Include="DbUp.Tests.Common" Version="5.0.37" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xunit" Version="2.6.6" />
+    <ProjectReference Include="..\dbup-postgresql\dbup-postgresql.csproj"/>
+    <PackageReference Include="DbUp.Tests.Common" Version="5.0.37"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+    <PackageReference Include="xunit" Version="2.6.6"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="ApprovalFiles\*.cs" />
-    <None Include="ApprovalFiles\*.cs" />
+    <Compile Remove="ApprovalFiles\*.cs"/>
+    <None Include="ApprovalFiles\*.cs"/>
   </ItemGroup>
-  
+
 </Project>

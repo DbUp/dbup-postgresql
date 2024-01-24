@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbup-newprovider", "dbup-newprovider\dbup-newprovider.csproj", "{2A7189BD-96CE-41CA-9100-E1B1DD10FF40}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbup-postgresql", "dbup-postgresql\dbup-postgresql.csproj", "{2A7189BD-96CE-41CA-9100-E1B1DD10FF40}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{8CE634FE-6772-408E-9340-909F6218F8F7}"
 EndProject
@@ -22,7 +22,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{77157734-01DA-4AA3-A15C-504013343B29}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		dbup-newprovider.sln.DotSettings = dbup-newprovider.sln.DotSettings
+		dbup-postgresql.sln.DotSettings = dbup-postgresql.sln.DotSettings
 	EndProjectSection
 EndProject
 Global

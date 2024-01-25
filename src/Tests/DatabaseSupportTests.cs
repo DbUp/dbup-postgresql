@@ -1,4 +1,5 @@
 ﻿#if !NETCORE
+using System;
 using DbUp.Builder;
 using DbUp.Tests.Common;
 
@@ -8,6 +9,7 @@ public class DatabaseSupportTests : DatabaseSupportTestsBase
 {
     public DatabaseSupportTests() : base()
     {
+        AppContext.SetSwitch("Npgsql.EnableSqlRewriting", true);
     }
 
     protected override UpgradeEngineBuilder DeployTo(SupportedDatabases to)

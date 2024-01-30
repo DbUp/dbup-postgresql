@@ -1,4 +1,4 @@
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/DbUp/dbup-postgresql/CI/main)](https://github.com/DbUp/dbup-postgresql/actions/workflows/main.yml?query=branch%3Amain)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/DbUp/dbup-postgresql/main.yml?branch=main)](https://github.com/DbUp/dbup-postgresql/actions/workflows/main.yml?query=branch%3Amain)
 [![NuGet](https://img.shields.io/nuget/dt/dbup-postgresql.svg)](https://www.nuget.org/packages/dbup-postgresql)
 [![NuGet](https://img.shields.io/nuget/v/dbup-postgresql.svg)](https://www.nuget.org/packages/dbup-postgresql)
 [![Prerelease](https://img.shields.io/nuget/vpre/dbup-postgresql?color=orange&label=prerelease)](https://www.nuget.org/packages/dbup-postgresql)

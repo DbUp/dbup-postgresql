@@ -19,7 +19,9 @@
   <ItemGroup>
     <PackageReference Include="dbup-core" Version="5.0.37"/>
 <!--    <PackageReference Include="System.Net.Security" Version="4.3.2"/>-->
-    <PackageReference Include="Npgsql" Version="3.2.7"/>
+    <PackageReference Include="Npgsql" Version="3.2.7" Condition=" '$(TargetFramework)' == 'netstandard1.3' " />
+    <PackageReference Include="Npgsql" Version="8.0.2" Condition=" '$(TargetFramework)' == 'netstandard2.0' " />
+    <PackageReference Include="Npgsql" Version="8.0.2" Condition=" '$(TargetFramework)' == 'net462' " />
   </ItemGroup>
 
   <ItemGroup>

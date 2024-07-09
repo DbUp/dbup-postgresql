@@ -27,11 +27,23 @@ namespace DbUp.Postgresql
         /// <param name="connectionString">The PostgreSQL connection string.</param>
         /// <param name="certificate">Certificate for securing connection.</param>
         public PostgresqlConnectionManager(string connectionString, X509Certificate2 certificate)
+            : this(connectionString, new PostgresqlConnectionOptions
+            {
+                ClientCertificate = certificate
+            }) 
+        {
+        }
+
+        /// <summary>
+        /// Create a new PostgreSQL database connection 
+        /// </summary>
+        /// <param name="connectionString">The PostgreSQL connection string.</param>
+        /// <param name="connectionOptions">Custom options to apply on the created connection</param>
+        public PostgresqlConnectionManager(string connectionString, PostgresqlConnectionOptions connectionOptions)
             : base(new DelegateConnectionFactory(l =>
                 {
                     NpgsqlConnection databaseConnection = new NpgsqlConnection(connectionString);
-                    databaseConnection.ProvideClientCertificatesCallback +=
-                        certs => certs.Add(certificate);
+                    databaseConnection.ApplyConnectionOptions(connectionOptions);
 
                     return databaseConnection;
                 }

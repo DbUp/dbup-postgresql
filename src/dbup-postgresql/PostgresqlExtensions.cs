@@ -52,6 +52,19 @@ public static class PostgresqlExtensions
         => PostgresqlDatabase(new PostgresqlConnectionManager(connectionString, certificate), schema);
 
     /// <summary>
+    /// Creates an upgrader for PostgreSQL databases that use SSL.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">PostgreSQL database connection string.</param>
+    /// <param name="schema">The schema in which to check for changes</param>
+    /// <param name="connectionOptions">Connection options to set SSL parameters</param>
+    /// <returns>
+    /// A builder for a database upgrader designed for PostgreSQL databases.
+    /// </returns>
+    public static UpgradeEngineBuilder PostgresqlDatabase(this SupportedDatabases supported, string connectionString, string schema, PostgresqlConnectionOptions connectionOptions)
+        => PostgresqlDatabase(new PostgresqlConnectionManager(connectionString, connectionOptions), schema);
+
+    /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>
     /// <param name="supported">Fluent helper type.</param>
@@ -114,6 +127,18 @@ public static class PostgresqlExtensions
     }
 
     /// <summary>
+    /// Ensures that the database specified in the connection string exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="connectionOptions">Connection SSL to customize SSL behaviour</param>
+    /// <returns></returns>
+    public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, PostgresqlConnectionOptions connectionOptions)
+    {
+        PostgresqlDatabase(supported, connectionString, new ConsoleUpgradeLog(), connectionOptions);
+    }
+
+    /// <summary>
     /// Ensures that the database specified in the connection string exists.
     /// </summary>
     /// <param name="supported">Fluent helper type.</param>
@@ -122,10 +147,19 @@ public static class PostgresqlExtensions
     /// <returns></returns>
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger)
     {
-        PostgresqlDatabase(supported, connectionString, logger, null);
+        PostgresqlDatabase(supported, connectionString, logger, (PostgresqlConnectionOptions)null);
+    }
+    
+    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
+    {
+        var options = new PostgresqlConnectionOptions
+        { 
+            ClientCertificate = certificate
+        };
+        PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
-    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
+    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, PostgresqlConnectionOptions connectionOptions)
     {
         if (supported == null) throw new ArgumentNullException("supported");
 
@@ -137,7 +171,7 @@ public static class PostgresqlExtensions
         if (logger == null) throw new ArgumentNullException("logger");
 
         var masterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
-
+        
         var databaseName = masterConnectionStringBuilder.Database;
 
         if (string.IsNullOrEmpty(databaseName) || databaseName.Trim() == string.Empty)
@@ -157,11 +191,7 @@ public static class PostgresqlExtensions
 
         using (var connection = new NpgsqlConnection(masterConnectionStringBuilder.ConnectionString))
         {
-            if (certificate != null)
-            {
-                connection.ProvideClientCertificatesCallback +=
-                    certs => certs.Add(certificate);
-            }
+            connection.ApplyConnectionOptions(connectionOptions);
             connection.Open();
 
             var sqlCommandText = string.Format
@@ -215,5 +245,18 @@ public static class PostgresqlExtensions
     {
         builder.Configure(c => c.Journal = new PostgresqlTableJournal(() => c.ConnectionManager, () => c.Log, schema, table));
         return builder;
+    }
+
+    internal static void ApplyConnectionOptions(this NpgsqlConnection connection, PostgresqlConnectionOptions connectionOptions)
+    {
+        if (connectionOptions?.ClientCertificate != null)
+        {
+            connection.ProvideClientCertificatesCallback +=
+                certs => certs.Add(connectionOptions.ClientCertificate);
+        }
+        if (connectionOptions?.UserCertificateValidationCallback != null)
+        {
+            connection.UserCertificateValidationCallback = connectionOptions.UserCertificateValidationCallback;
+        }
     }
 }

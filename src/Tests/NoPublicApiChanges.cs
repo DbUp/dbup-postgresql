@@ -1,5 +1,4 @@
-﻿#if !NETCORE
-using DbUp.Tests.Common;
+﻿using DbUp.Tests.Common;
 
 namespace DbUp.Postgresql.Tests;
 
@@ -10,4 +9,3 @@ public class NoPublicApiChanges : NoPublicApiChangesBase
     {
     }
 }
-#endif

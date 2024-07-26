@@ -6,7 +6,7 @@
     <Company>DbUp Contributors</Company>
     <Product>DbUp</Product>
     <Copyright>Copyright © DbUp Contributors 2015</Copyright>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;net462</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>dbup-postgresql</AssemblyName>
     <RootNamespace>DbUp.Postgresql</RootNamespace>
     <PackageId>dbup-postgresql</PackageId>
@@ -16,10 +16,15 @@
     <PackageIcon>dbup-icon.png</PackageIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild> <!-- Perform a deterministic build, so our binaries aren't impacted by build server environmental factors (e.g. file paths). -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources> <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <DebugType>embedded</DebugType> <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="dbup-core" Version="5.0.37"/>
-<!--    <PackageReference Include="System.Net.Security" Version="4.3.2"/>-->
-    <PackageReference Include="Npgsql" Version="3.2.7"/>
+    <PackageReference Include="dbup-core" Version="6.0.0-beta.146"/>
+    <PackageReference Include="Npgsql" Version="8.0.3" />
   </ItemGroup>
 
   <ItemGroup>

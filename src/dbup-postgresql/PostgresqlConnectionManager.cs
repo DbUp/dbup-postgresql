@@ -40,6 +40,15 @@ namespace DbUp.Postgresql
         }
 
         /// <summary>
+        /// Creates a new PostgreSQL database connection with a NpgsqlDatasource
+        /// </summary>
+        /// <param name="datasource">The PostgreSQL NpgsqlDataSource.</param>
+        public PostgresqlConnectionManager(NpgsqlDataSource datasource)
+            : base(new DelegateConnectionFactory(l => datasource.CreateConnection()))
+        {
+        }
+
+        /// <summary>
         /// Splits the statements in the script using the ";" character.
         /// </summary>
         /// <param name="scriptContents">The contents of the script to split.</param>

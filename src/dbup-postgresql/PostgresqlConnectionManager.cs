@@ -39,7 +39,6 @@ namespace DbUp.Postgresql
         {
         }
 
-#if (NETSTANDARD2_0_OR_GREATER  || NET462_OR_GREATER)
         /// <summary>
         /// Creates a new PostgreSQL database connection with a NpgsqlDatasource
         /// </summary>
@@ -48,7 +47,6 @@ namespace DbUp.Postgresql
             : base(new DelegateConnectionFactory(l => datasource.CreateConnection()))
         {
         }
-#endif
 
         /// <summary>
         /// Splits the statements in the script using the ";" character.

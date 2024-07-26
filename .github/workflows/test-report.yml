@@ -1,0 +1,12 @@
+name: Test Report
+run-name: Generate Test Report for run `${{ github.event.workflow_run.run_number }}` branch `${{ github.event.workflow_run.head_branch }}`
+
+on:
+  workflow_run:
+    workflows: ["CI", "build"]
+    types: [completed]
+
+jobs:
+  report:
+    name: Test Report 🧪
+    uses: DbUp/Universe/.github/workflows/test-report.yml@main

@@ -15,6 +15,8 @@ using Npgsql;
 /// </summary>
 public static class PostgresqlExtensions
 {
+    public static string MasterDatabaseName { get; set; } = "postgres";
+
     /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>
@@ -145,7 +147,7 @@ public static class PostgresqlExtensions
             throw new InvalidOperationException("The connection string does not specify a database name.");
         }
 
-        masterConnectionStringBuilder.Database = "postgres";
+        masterConnectionStringBuilder.Database = MasterDatabaseName;
 
         var logMasterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(masterConnectionStringBuilder.ConnectionString);
         if (!string.IsNullOrEmpty(logMasterConnectionStringBuilder.Password))

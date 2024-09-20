@@ -15,6 +15,10 @@ using Npgsql;
 /// </summary>
 public static class PostgresqlExtensions
 {
+    /// <summary>
+    /// Makes it possible to change the master database name, 
+    /// in case there is no database names "postgres".
+    /// </summary>
     public static string MasterDatabaseName { get; set; } = "postgres";
 
     /// <summary>

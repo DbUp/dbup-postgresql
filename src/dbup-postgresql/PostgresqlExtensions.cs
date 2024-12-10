@@ -247,14 +247,13 @@ public static class PostgresqlExtensions
 
     internal static void ApplyConnectionOptions(this NpgsqlConnection connection, PostgresqlConnectionOptions connectionOptions)
     {
-        if (connectionOptions?.ClientCertificate != null)
+        connection.SslClientAuthenticationOptionsCallback = options =>
         {
-            connection.ProvideClientCertificatesCallback +=
-                certs => certs.Add(connectionOptions.ClientCertificate);
-        }
-        if (connectionOptions?.UserCertificateValidationCallback != null)
-        {
-            connection.UserCertificateValidationCallback = connectionOptions.UserCertificateValidationCallback;
-        }
+            if (connectionOptions?.ClientCertificate != null)
+                options.ClientCertificates = new X509Certificate2Collection(connectionOptions.ClientCertificate);
+
+            if (connectionOptions?.UserCertificateValidationCallback != null)
+                options.RemoteCertificateValidationCallback = connectionOptions.UserCertificateValidationCallback;
+        };
     }
 }

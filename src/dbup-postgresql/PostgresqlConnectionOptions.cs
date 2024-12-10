@@ -14,9 +14,14 @@ namespace DbUp.Postgresql
         public X509Certificate2 ClientCertificate { get; set; }
 
         /// <summary>
-        //  Custom handler to verify the remote SSL certificate.
-        //  Ignored if Npgsql.NpgsqlConnectionStringBuilder.TrustServerCertificate is set.
+        ///  Custom handler to verify the remote SSL certificate.
+        ///  Ignored if Npgsql.NpgsqlConnectionStringBuilder.TrustServerCertificate is set.
         /// </summary>
         public RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
+
+        /// <summary>
+        /// The database to connect to initially. Default is 'postgres'.
+        /// </summary>
+        public string MasterDatabaseName { get; set; } = "postgres";
     }
 }

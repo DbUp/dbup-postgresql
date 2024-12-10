@@ -16,12 +16,6 @@ using Npgsql;
 public static class PostgresqlExtensions
 {
     /// <summary>
-    /// Makes it possible to change the master database name, 
-    /// in case there is no database names "postgres".
-    /// </summary>
-    public static string MasterDatabaseName { get; set; } = "postgres";
-
-    /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>
     /// <param name="supported">Fluent helper type.</param>
@@ -165,7 +159,12 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
-    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, PostgresqlConnectionOptions connectionOptions)
+    private static void PostgresqlDatabase(
+        this SupportedDatabasesForEnsureDatabase supported, 
+        string connectionString, 
+        IUpgradeLog logger, 
+        PostgresqlConnectionOptions connectionOptions
+    )
     {
         if (supported == null) throw new ArgumentNullException("supported");
 
@@ -185,7 +184,7 @@ public static class PostgresqlExtensions
             throw new InvalidOperationException("The connection string does not specify a database name.");
         }
 
-        masterConnectionStringBuilder.Database = MasterDatabaseName;
+        masterConnectionStringBuilder.Database = connectionOptions.MasterDatabaseName;
 
         var logMasterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(masterConnectionStringBuilder.ConnectionString);
         if (!string.IsNullOrEmpty(logMasterConnectionStringBuilder.Password))

@@ -159,7 +159,12 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
-    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, PostgresqlConnectionOptions connectionOptions)
+    private static void PostgresqlDatabase(
+        this SupportedDatabasesForEnsureDatabase supported, 
+        string connectionString, 
+        IUpgradeLog logger, 
+        PostgresqlConnectionOptions connectionOptions
+    )
     {
         if (supported == null) throw new ArgumentNullException("supported");
 
@@ -179,7 +184,7 @@ public static class PostgresqlExtensions
             throw new InvalidOperationException("The connection string does not specify a database name.");
         }
 
-        masterConnectionStringBuilder.Database = "postgres";
+        masterConnectionStringBuilder.Database = connectionOptions.MasterDatabaseName;
 
         var logMasterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(masterConnectionStringBuilder.ConnectionString);
         if (!string.IsNullOrEmpty(logMasterConnectionStringBuilder.Password))

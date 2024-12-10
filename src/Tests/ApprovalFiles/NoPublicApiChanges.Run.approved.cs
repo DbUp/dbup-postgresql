@@ -25,6 +25,7 @@ namespace DbUp.Postgresql
         public PostgresqlConnectionManager(Npgsql.NpgsqlDataSource datasource) { }
         public PostgresqlConnectionManager(string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
         public PostgresqlConnectionManager(string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
+        public bool StandardConformingStrings { get; set; }
         public override System.Collections.Generic.IEnumerable<string> SplitScriptIntoCommands(string scriptContents) { }
     }
     public class PostgresqlConnectionOptions

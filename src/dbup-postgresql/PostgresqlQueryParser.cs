@@ -1,4 +1,8 @@
-﻿#nullable enable
+﻿// This code based on original code from Npgsql
+// https://github.com/npgsql/npgsql/blob/main/src/Npgsql/SqlQueryParser.cs
+// which is BSD license: https://github.com/npgsql/npgsql/blob/main/LICENSE
+
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

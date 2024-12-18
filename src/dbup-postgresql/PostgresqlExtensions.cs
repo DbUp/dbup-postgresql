@@ -147,10 +147,10 @@ public static class PostgresqlExtensions
     /// <returns></returns>
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger)
     {
-        PostgresqlDatabase(supported, connectionString, logger, (PostgresqlConnectionOptions)null);
+        PostgresqlDatabase(supported, connectionString, logger, new PostgresqlConnectionOptions());
     }
-    
-    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
+
+    public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions
         { 
@@ -159,7 +159,7 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
-    private static void PostgresqlDatabase(
+    public static void PostgresqlDatabase(
         this SupportedDatabasesForEnsureDatabase supported, 
         string connectionString, 
         IUpgradeLog logger, 

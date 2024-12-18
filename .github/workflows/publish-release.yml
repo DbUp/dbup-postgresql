@@ -1,0 +1,12 @@
+name: Publish DbUp Packages to NuGet
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish Package
+    uses: DbUp/Universe/.github/workflows/publish-release.yml@main
+    secrets: inherit

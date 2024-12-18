@@ -1,4 +1,4 @@
-﻿[assembly: System.CLSCompliantAttribute(true)]
+﻿[assembly: System.CLSCompliantAttribute(false)]
 [assembly: System.Runtime.InteropServices.ComVisibleAttribute(false)]
 [assembly: System.Runtime.InteropServices.GuidAttribute("5ddc04cc-0bd3-421e-9ae4-9fd0e4f4ef04")]
 
@@ -16,20 +16,25 @@ public static class PostgresqlExtensions
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger) { }
+    public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
+    public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
 }
 namespace DbUp.Postgresql
 {
     public class PostgresqlConnectionManager : DbUp.Engine.Transactions.DatabaseConnectionManager, DbUp.Engine.Transactions.IConnectionManager
     {
         public PostgresqlConnectionManager(string connectionString) { }
+        public PostgresqlConnectionManager(Npgsql.NpgsqlDataSource datasource) { }
         public PostgresqlConnectionManager(string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
         public PostgresqlConnectionManager(string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
+        public bool StandardConformingStrings { get; set; }
         public override System.Collections.Generic.IEnumerable<string> SplitScriptIntoCommands(string scriptContents) { }
     }
     public class PostgresqlConnectionOptions
     {
         public PostgresqlConnectionOptions() { }
         public System.Security.Cryptography.X509Certificates.X509Certificate2 ClientCertificate { get; set; }
+        public string MasterDatabaseName { get; set; }
         public System.Net.Security.RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
     }
     public class PostgresqlObjectParser : DbUp.Support.SqlObjectParser, DbUp.Engine.ISqlObjectParser

@@ -192,7 +192,7 @@ public static class PostgresqlExtensions
             logMasterConnectionStringBuilder.Password = "******";
         }
 
-        logger.LogInformation("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
+        logger.LogDebug("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
 
         using (var connection = new NpgsqlConnection(masterConnectionStringBuilder.ConnectionString))
         {

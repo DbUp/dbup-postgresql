@@ -1,6 +1,4 @@
-﻿#if !NETCORE
-using System;
-using DbUp.Builder;
+﻿using DbUp.Builder;
 using DbUp.Tests.Common;
 
 namespace DbUp.Postgresql.Tests;
@@ -21,4 +19,3 @@ public class DatabaseSupportTests : DatabaseSupportTestsBase
                 => new PostgresqlTableJournal(connectionManagerFactory, logFactory, schema, tableName)
         );
 }
-#endif

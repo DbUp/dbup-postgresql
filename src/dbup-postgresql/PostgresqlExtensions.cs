@@ -147,10 +147,10 @@ public static class PostgresqlExtensions
     /// <returns></returns>
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger)
     {
-        PostgresqlDatabase(supported, connectionString, logger, (PostgresqlConnectionOptions)null);
+        PostgresqlDatabase(supported, connectionString, logger, new PostgresqlConnectionOptions());
     }
-    
-    private static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
+
+    public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions
         { 
@@ -159,7 +159,7 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
-    private static void PostgresqlDatabase(
+    public static void PostgresqlDatabase(
         this SupportedDatabasesForEnsureDatabase supported, 
         string connectionString, 
         IUpgradeLog logger, 
@@ -192,18 +192,15 @@ public static class PostgresqlExtensions
             logMasterConnectionStringBuilder.Password = "******";
         }
 
-        logger.WriteInformation("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
+        logger.LogDebug("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
 
         using (var connection = new NpgsqlConnection(masterConnectionStringBuilder.ConnectionString))
         {
             connection.ApplyConnectionOptions(connectionOptions);
             connection.Open();
 
-            var sqlCommandText = string.Format
-                (
-                    @"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{0}' limit 1;",
-                    databaseName
-                );
+            var sqlCommandText =
+                $@"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{databaseName}' limit 1;";
 
             // check to see if the database already exists..
             using (var command = new NpgsqlCommand(sqlCommandText, connection)
@@ -220,11 +217,7 @@ public static class PostgresqlExtensions
                 }
             }
 
-            sqlCommandText = string.Format
-                (
-                    "create database \"{0}\";",
-                    databaseName
-                );
+            sqlCommandText = $"create database \"{databaseName}\";";
 
             // Create the database...
             using (var command = new NpgsqlCommand(sqlCommandText, connection)
@@ -235,7 +228,7 @@ public static class PostgresqlExtensions
                 command.ExecuteNonQuery();
             }
 
-            logger.WriteInformation(@"Created database {0}", databaseName);
+            logger.LogInformation(@"Created database {0}", databaseName);
         }
     }
 
@@ -254,14 +247,13 @@ public static class PostgresqlExtensions
 
     internal static void ApplyConnectionOptions(this NpgsqlConnection connection, PostgresqlConnectionOptions connectionOptions)
     {
-        if (connectionOptions?.ClientCertificate != null)
+        connection.SslClientAuthenticationOptionsCallback = options =>
         {
-            connection.ProvideClientCertificatesCallback +=
-                certs => certs.Add(connectionOptions.ClientCertificate);
-        }
-        if (connectionOptions?.UserCertificateValidationCallback != null)
-        {
-            connection.UserCertificateValidationCallback = connectionOptions.UserCertificateValidationCallback;
-        }
+            if (connectionOptions?.ClientCertificate != null)
+                options.ClientCertificates = new X509Certificate2Collection(connectionOptions.ClientCertificate);
+
+            if (connectionOptions?.UserCertificateValidationCallback != null)
+                options.RemoteCertificateValidationCallback = connectionOptions.UserCertificateValidationCallback;
+        };
     }
 }

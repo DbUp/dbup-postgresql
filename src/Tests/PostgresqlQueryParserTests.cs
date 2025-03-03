@@ -47,6 +47,23 @@ public class PostgresqlQueryParserTests
                 'text';
                 SELECT '1'
                 """, 2)]
+    [InlineData("""
+                START TRANSACTION;
+
+                DO $EF$
+                BEGIN
+                    INSERT INTO "AspNetUsers" ("Id", "UserName")
+                    VALUES ('65fe2157-3214-4de5-8664-2648b67c530e', 'John');
+                END $EF$;
+
+                DO $EF$
+                BEGIN
+                    INSERT INTO "AspNetUsers" ("Id", "UserName")
+                    VALUES ('7cc03149-09e9-42eb-9554-d3ce3bed15bd', 'Jane');
+                END $EF$;
+
+                COMMIT;
+                """, 4)]
     public void split_into_statements(string sql, int statementCount, params string[] expected)
     {
         var results = ParseCommand(sql);

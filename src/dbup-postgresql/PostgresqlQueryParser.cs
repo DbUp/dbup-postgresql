@@ -239,7 +239,6 @@ internal static class PostgresqlQueryParser
             goto Finish;
         }
 
-        pos += dollarTagEnd + 1; // If the substring is found adjust the position to be relative to the entire string
         currCharOfs = pos + dollarTagEnd - dollarTagStart + 2;
         ch = '\0';
         goto None;

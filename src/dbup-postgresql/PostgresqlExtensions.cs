@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using DbUp;
 using DbUp.Builder;
 using DbUp.Engine.Output;
@@ -15,6 +16,7 @@ using Npgsql;
 /// </summary>
 public static class PostgresqlExtensions
 {
+    private static readonly string pattern= @"(?i)SearchPath=([^;]+)";
     /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>
@@ -24,8 +26,21 @@ public static class PostgresqlExtensions
     /// A builder for a database upgrader designed for PostgreSQL databases.
     /// </returns>
     public static UpgradeEngineBuilder PostgresqlDatabase(this SupportedDatabases supported, string connectionString)
-        => PostgresqlDatabase(supported, connectionString, null);
-
+        => PostgresqlDatabase(supported, connectionString, GetDefaultSchemaByConnectionString(connectionString));
+    /// <summary>
+    /// Get connection string use parameter SearchPath for defaultSchema
+    /// </summary>
+    /// <param name="connectionString">PostgreSQL database connection string.</param>
+    /// <returns></returns>
+    private static string GetDefaultSchemaByConnectionString(string connectionString)
+    {
+        Match match = Regex.Match(connectionString, pattern);
+        if (match.Success)
+        {
+            return match.Groups[1].Value;
+        }
+        return null;
+    }
     /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>

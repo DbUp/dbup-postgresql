@@ -11,10 +11,10 @@ namespace DbUp.Postgresql;
 /// This factory provides better performance and resource management compared to traditional connection strings
 /// by reusing configured data sources and connection pooling.
 /// </summary>
-public class DataSourceConnectionFactory : IConnectionFactory
+internal class DataSourceConnectionFactory : IConnectionFactory
 {
 
-    private readonly NpgsqlDataSource _dataSource;
+    private readonly NpgsqlDataSource dataSource;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DataSourceConnectionFactory"/> class.
@@ -69,7 +69,7 @@ public class DataSourceConnectionFactory : IConnectionFactory
             builder.UseUserCertificateValidationCallback(connectionOptions.UserCertificateValidationCallback);
         }
 #endif
-        _dataSource = builder.Build();
+        dataSource = builder.Build();
     }
 
     /// <summary>
@@ -82,12 +82,12 @@ public class DataSourceConnectionFactory : IConnectionFactory
     /// The returned connection is not automatically opened. The caller is responsible for opening and properly disposing of the connection.
     /// The connection benefits from the data source's connection pooling and configuration reuse.
     /// </remarks>
-    public IDbConnection CreateConnection(IUpgradeLog upgradeLog, DatabaseConnectionManager databaseConnectionManager) => _dataSource.CreateConnection();
+    public IDbConnection CreateConnection(IUpgradeLog upgradeLog, DatabaseConnectionManager databaseConnectionManager) => dataSource.CreateConnection();
 
     /// <summary>
     /// Creates a new database connection using the configured data source.
     /// Simpler implementation of <see cref="CreateConnection(IUpgradeLog, DatabaseConnectionManager)"/>  for internal use. 
     /// </summary>
     /// <returns>A new <see cref="IDbConnection"/> instance ready for use.</returns>
-    internal NpgsqlConnection CreateConnection() => _dataSource.CreateConnection();
+    internal NpgsqlConnection CreateConnection() => dataSource.CreateConnection();
 }

@@ -16,7 +16,7 @@ using Npgsql;
 /// </summary>
 public static class PostgresqlExtensions
 {
-    private static readonly string pattern= @"(?i)SearchPath=([^;]+)";
+    private static readonly string pattern= @"(?i)Search\s?Path=([^;]+)";
     /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>

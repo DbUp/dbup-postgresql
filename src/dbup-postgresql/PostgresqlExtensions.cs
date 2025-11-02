@@ -315,7 +315,7 @@ public static class PostgresqlExtensions
 
         if (databaseName == connectionOptions.MasterDatabaseName)
         {
-            throw new InvalidOperationException($"Database in connection string needs to be different than the master database in PostgresqlConnectionOptions.");
+            throw new InvalidOperationException("Database in connection string needs to be different than the master database in PostgresqlConnectionOptions.");
         }
 
         masterConnectionStringBuilder.Database = connectionOptions.MasterDatabaseName;

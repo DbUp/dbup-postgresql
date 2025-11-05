@@ -246,6 +246,164 @@ public static class PostgresqlExtensions
     }
 
     /// <summary>
+    /// Drops the database specified in the connection string if it exists.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <returns></returns>
+    public static void PostgresqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString)
+    {
+        PostgresqlDatabase(supported, connectionString, new ConsoleUpgradeLog());
+    }
+
+    /// <summary>
+    /// Drops the database specified in the connection string if it exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="certificate">Certificate for securing connection.</param>
+    /// <returns></returns>
+    public static void PostgresqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString, X509Certificate2 certificate)
+    {
+        PostgresqlDatabase(supported, connectionString, new ConsoleUpgradeLog(), certificate);
+    }
+
+    /// <summary>
+    /// Drops the database specified in the connection string if it exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="connectionOptions">Connection SSL to customize SSL behaviour</param>
+    /// <returns></returns>
+    public static void PostgresqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString, PostgresqlConnectionOptions connectionOptions)
+    {
+        PostgresqlDatabase(supported, connectionString, new ConsoleUpgradeLog(), connectionOptions);
+    }
+
+    /// <summary>
+    /// Drops that the database specified in the connection string if it exists.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <returns></returns>
+    public static void PostgresqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString, IUpgradeLog logger)
+    {
+        PostgresqlDatabase(supported, connectionString, logger, new PostgresqlConnectionOptions());
+    }
+
+    public static void PostgresqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
+    {
+        var options = new PostgresqlConnectionOptions
+        {
+            ClientCertificate = certificate
+        };
+        PostgresqlDatabase(supported, connectionString, logger, options);
+    }
+
+    public static void PostgresqlDatabase(
+        this SupportedDatabasesForDropDatabase supported,
+        string connectionString,
+        IUpgradeLog logger,
+        PostgresqlConnectionOptions connectionOptions
+    )
+    {
+        if (supported == null) throw new ArgumentNullException("supported");
+
+        if (string.IsNullOrEmpty(connectionString) || connectionString.Trim() == string.Empty)
+        {
+            throw new ArgumentNullException("connectionString");
+        }
+
+        if (logger == null) throw new ArgumentNullException("logger");
+
+        var masterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+
+        var databaseName = masterConnectionStringBuilder.Database;       
+
+        if (string.IsNullOrEmpty(databaseName) || databaseName.Trim() == string.Empty)
+        {
+            throw new InvalidOperationException("The connection string does not specify a database name.");
+        }
+
+        if (databaseName == connectionOptions.MasterDatabaseName)
+        {
+            throw new InvalidOperationException("Database in connection string needs to be different than the master database in PostgresqlConnectionOptions.");
+        }
+
+        masterConnectionStringBuilder.Database = connectionOptions.MasterDatabaseName;
+        masterConnectionStringBuilder.SearchPath = "public";
+
+        var logMasterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(masterConnectionStringBuilder.ConnectionString);
+        if (!string.IsNullOrEmpty(logMasterConnectionStringBuilder.Password))
+        {
+            logMasterConnectionStringBuilder.Password = "******";
+        }
+
+        logger.LogDebug("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
+
+        var factory = new DataSourceConnectionFactory(masterConnectionStringBuilder.ConnectionString, connectionOptions);
+        using var connection = factory.CreateConnection();
+        connection.Open();
+
+        var sqlCommandText =
+            $@"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{databaseName}' limit 1;";
+
+        // check to see if the database already exists..
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            var results = Convert.ToInt32(command.ExecuteScalar());
+
+            // if the database does not exist, we're done here...
+            if (results == 0)
+            {
+                logger.LogInformation(@"Database {0} does not exist. Skipping delete operation.", databaseName);
+                return;
+            }
+        }
+
+        // prevent new connections to the database
+        sqlCommandText = $"alter database \"{databaseName}\" with ALLOW_CONNECTIONS false;";
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Stopped connections for database {0}.", databaseName);
+
+        // terminate all existing connections to the database
+        sqlCommandText = $"select pg_terminate_backend(pg_stat_activity.pid) from pg_stat_activity where pg_stat_activity.datname = \'{databaseName}\';";
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Closed existing connections for database {0}.", databaseName);
+
+        sqlCommandText = $"drop database \"{databaseName}\";";
+
+        // drop the database
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Dropped database {0}.", databaseName);
+    }
+
+    /// <summary>
     /// Tracks the list of executed scripts in a PostgreSQL table.
     /// </summary>
     /// <param name="builder">The builder.</param>

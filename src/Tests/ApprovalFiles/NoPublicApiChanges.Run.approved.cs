@@ -1,6 +1,4 @@
-﻿using DbUp.Postgresql;
-
-[assembly: System.CLSCompliantAttribute(false)]
+﻿[assembly: System.CLSCompliantAttribute(false)]
 [assembly: System.Runtime.InteropServices.ComVisibleAttribute(false)]
 [assembly: System.Runtime.InteropServices.GuidAttribute("5ddc04cc-0bd3-421e-9ae4-9fd0e4f4ef04")]
 

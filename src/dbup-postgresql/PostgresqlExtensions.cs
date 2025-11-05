@@ -327,67 +327,65 @@ public static class PostgresqlExtensions
 
         logger.LogDebug("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
 
-        using (var connection = new NpgsqlConnection(masterConnectionStringBuilder.ConnectionString))
+        var factory = new DataSourceConnectionFactory(masterConnectionStringBuilder.ConnectionString, connectionOptions);
+        using var connection = factory.CreateConnection();
+        connection.Open();
+
+        var sqlCommandText =
+            $@"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{databaseName}' limit 1;";
+
+        // check to see if the database already exists..
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
         {
-            connection.ApplyConnectionOptions(connectionOptions);
-            connection.Open();
+            var results = Convert.ToInt32(command.ExecuteScalar());
 
-            var sqlCommandText =
-                $@"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{databaseName}' limit 1;";
-
-            // check to see if the database already exists..
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            // if the database does not exist, we're done here...
+            if (results == 0)
             {
-                CommandType = CommandType.Text
-            })
-            {
-                var results = Convert.ToInt32(command.ExecuteScalar());
-
-                // if the database does not exist, we're done here...
-                if (results == 0)
-                {
-                    logger.LogInformation(@"Database {0} does not exist. Skipping delete operation.", databaseName);
-                    return;
-                }
+                logger.LogInformation(@"Database {0} does not exist. Skipping delete operation.", databaseName);
+                return;
             }
-
-            // prevent new connections to the database
-            sqlCommandText = $"alter database \"{databaseName}\" with ALLOW_CONNECTIONS false;";
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
-            {
-                CommandType = CommandType.Text
-            })
-            {
-                command.ExecuteNonQuery();
-            }
-
-            logger.LogInformation(@"Stopped connections for database {0}.", databaseName);
-
-            // terminate all existing connections to the database
-            sqlCommandText = $"select pg_terminate_backend(pg_stat_activity.pid) from pg_stat_activity where pg_stat_activity.datname = \'{databaseName}\';";
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
-            {
-                CommandType = CommandType.Text
-            })
-            {
-                command.ExecuteNonQuery();
-            }
-
-            logger.LogInformation(@"Closed existing connections for database {0}.", databaseName);
-
-            sqlCommandText = $"drop database \"{databaseName}\";";
-
-            // drop the database
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
-            {
-                CommandType = CommandType.Text
-            })
-            {
-                command.ExecuteNonQuery();
-            }
-
-            logger.LogInformation(@"Dropped database {0}.", databaseName);
         }
+
+        // prevent new connections to the database
+        sqlCommandText = $"alter database \"{databaseName}\" with ALLOW_CONNECTIONS false;";
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Stopped connections for database {0}.", databaseName);
+
+        // terminate all existing connections to the database
+        sqlCommandText = $"select pg_terminate_backend(pg_stat_activity.pid) from pg_stat_activity where pg_stat_activity.datname = \'{databaseName}\';";
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Closed existing connections for database {0}.", databaseName);
+
+        sqlCommandText = $"drop database \"{databaseName}\";";
+
+        // drop the database
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Dropped database {0}.", databaseName);
     }
 
     /// <summary>

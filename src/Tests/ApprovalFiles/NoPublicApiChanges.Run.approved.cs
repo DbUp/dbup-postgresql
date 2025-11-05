@@ -16,7 +16,6 @@ public static class PostgresqlExtensions
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
-    public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions, string owner) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
@@ -25,6 +24,7 @@ public static class PostgresqlExtensions
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
+    public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions, string owner) { }
 }
 namespace DbUp.Postgresql
 {

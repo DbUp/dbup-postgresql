@@ -16,7 +16,7 @@ using Npgsql;
 /// </summary>
 public static class PostgresqlExtensions
 {
-    private static readonly string pattern= @"(?i)Search\s?Path=([^;]+)";
+    private static readonly string pattern = @"(?i)Search\s?Path=([^;]+)";
     /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>
@@ -165,20 +165,54 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, new PostgresqlConnectionOptions());
     }
 
+    /// <summary>
+    /// Ensures that the database specified in the connection string exists.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="certificate">Certificate for securing connection.</param>
+    /// <returns></returns>
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions
-        { 
+        {
             ClientCertificate = certificate
         };
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
+    /// <summary>
+    /// Ensures that the database specified in the connection string exists.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="connectionOptions">Connection SSL to customize SSL behaviour</param>
     public static void PostgresqlDatabase(
-        this SupportedDatabasesForEnsureDatabase supported, 
-        string connectionString, 
-        IUpgradeLog logger, 
+        this SupportedDatabasesForEnsureDatabase supported,
+        string connectionString,
+        IUpgradeLog logger,
         PostgresqlConnectionOptions connectionOptions
+    )
+    {
+        PostgresqlDatabase(supported, connectionString, logger, connectionOptions, null);
+    }
+
+    /// <summary>
+    /// Ensures that the database specified in the connection string exists, assigning an owner at creation time.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="connectionOptions">Connection SSL to customize SSL behaviour</param>
+    /// <param name="owner">Role to own the new database during creation (adds 'WITH OWNER = "role"').</param>
+    public static void PostgresqlDatabase(
+        this SupportedDatabasesForEnsureDatabase supported,
+        string connectionString,
+        IUpgradeLog logger,
+        PostgresqlConnectionOptions connectionOptions,
+        string owner
     )
     {
         if (supported == null) throw new ArgumentNullException("supported");
@@ -191,13 +225,15 @@ public static class PostgresqlExtensions
         if (logger == null) throw new ArgumentNullException("logger");
 
         var masterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
-        
+
         var databaseName = masterConnectionStringBuilder.Database;
 
         if (string.IsNullOrEmpty(databaseName) || databaseName.Trim() == string.Empty)
         {
             throw new InvalidOperationException("The connection string does not specify a database name.");
         }
+
+        owner = string.IsNullOrWhiteSpace(owner) ? masterConnectionStringBuilder.Username : owner;
 
         masterConnectionStringBuilder.Database = connectionOptions.MasterDatabaseName;
 
@@ -218,9 +254,9 @@ public static class PostgresqlExtensions
 
         // check to see if the database already exists..
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             var results = Convert.ToInt32(command.ExecuteScalar());
 
@@ -231,13 +267,29 @@ public static class PostgresqlExtensions
             }
         }
 
-        sqlCommandText = $"create database \"{databaseName}\";";
+        sqlCommandText = $"select 1 from pg_roles where rolname = \'{owner}\' limit 1;";
+        // check to see if the owner exists..
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+        {
+            CommandType = CommandType.Text
+        })
+        {
+            var results = Convert.ToInt32(command.ExecuteScalar());
+
+            // if the owner role does not exist, we throw an exception.
+            if (results == 0)
+            {
+                throw new InvalidOperationException($"PostgreSQL role '{owner}' does not exist.");
+            }
+        }
+
+        sqlCommandText = $"create database \"{databaseName}\" with owner = \"{owner}\";";
 
         // Create the database...
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }
@@ -319,7 +371,7 @@ public static class PostgresqlExtensions
 
         var masterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
 
-        var databaseName = masterConnectionStringBuilder.Database;       
+        var databaseName = masterConnectionStringBuilder.Database;
 
         if (string.IsNullOrEmpty(databaseName) || databaseName.Trim() == string.Empty)
         {
@@ -351,9 +403,9 @@ public static class PostgresqlExtensions
 
         // check to see if the database already exists..
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             var results = Convert.ToInt32(command.ExecuteScalar());
 
@@ -368,9 +420,9 @@ public static class PostgresqlExtensions
         // prevent new connections to the database
         sqlCommandText = $"alter database \"{databaseName}\" with ALLOW_CONNECTIONS false;";
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }
@@ -380,9 +432,9 @@ public static class PostgresqlExtensions
         // terminate all existing connections to the database
         sqlCommandText = $"select pg_terminate_backend(pg_stat_activity.pid) from pg_stat_activity where pg_stat_activity.datname = \'{databaseName}\';";
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }
@@ -393,9 +445,9 @@ public static class PostgresqlExtensions
 
         // drop the database
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }

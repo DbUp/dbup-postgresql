@@ -1,4 +1,6 @@
-﻿[assembly: System.CLSCompliantAttribute(false)]
+﻿using DbUp.Postgresql;
+
+[assembly: System.CLSCompliantAttribute(false)]
 [assembly: System.Runtime.InteropServices.ComVisibleAttribute(false)]
 [assembly: System.Runtime.InteropServices.GuidAttribute("5ddc04cc-0bd3-421e-9ae4-9fd0e4f4ef04")]
 
@@ -16,6 +18,7 @@ public static class PostgresqlExtensions
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }
+    public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions, string owner) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForEnsureDatabase supported, string connectionString, DbUp.Engine.Output.IUpgradeLog logger) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
     public static void PostgresqlDatabase(this DbUp.SupportedDatabasesForDropDatabase supported, string connectionString, DbUp.Postgresql.PostgresqlConnectionOptions connectionOptions) { }

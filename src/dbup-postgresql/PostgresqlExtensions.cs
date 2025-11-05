@@ -194,42 +194,40 @@ public static class PostgresqlExtensions
 
         logger.LogDebug("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
 
-        using (var connection = new NpgsqlConnection(masterConnectionStringBuilder.ConnectionString))
+        var factory = new DataSourceConnectionFactory(masterConnectionStringBuilder.ConnectionString, connectionOptions);
+        using var connection = factory.CreateConnection();
+        connection.Open();
+
+        var sqlCommandText =
+            $"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{databaseName}' limit 1;";
+
+        // check to see if the database already exists..
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
         {
-            connection.ApplyConnectionOptions(connectionOptions);
-            connection.Open();
+            var results = Convert.ToInt32(command.ExecuteScalar());
 
-            var sqlCommandText =
-                $@"SELECT case WHEN oid IS NOT NULL THEN 1 ELSE 0 end FROM pg_database WHERE datname = '{databaseName}' limit 1;";
-
-            // check to see if the database already exists..
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            // if the database exists, we're done here...
+            if (results == 1)
             {
-                CommandType = CommandType.Text
-            })
-            {
-                var results = Convert.ToInt32(command.ExecuteScalar());
-
-                // if the database exists, we're done here...
-                if (results == 1)
-                {
-                    return;
-                }
+                return;
             }
-
-            sqlCommandText = $"create database \"{databaseName}\";";
-
-            // Create the database...
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
-            {
-                CommandType = CommandType.Text
-            })
-            {
-                command.ExecuteNonQuery();
-            }
-
-            logger.LogInformation(@"Created database {0}", databaseName);
         }
+
+        sqlCommandText = $"create database \"{databaseName}\";";
+
+        // Create the database...
+        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+               {
+                   CommandType = CommandType.Text
+               })
+        {
+            command.ExecuteNonQuery();
+        }
+
+        logger.LogInformation(@"Created database {0}", databaseName);
     }
 
     /// <summary>
@@ -243,17 +241,5 @@ public static class PostgresqlExtensions
     {
         builder.Configure(c => c.Journal = new PostgresqlTableJournal(() => c.ConnectionManager, () => c.Log, schema, table));
         return builder;
-    }
-
-    internal static void ApplyConnectionOptions(this NpgsqlConnection connection, PostgresqlConnectionOptions connectionOptions)
-    {
-        connection.SslClientAuthenticationOptionsCallback = options =>
-        {
-            if (connectionOptions?.ClientCertificate != null)
-                options.ClientCertificates = new X509Certificate2Collection(connectionOptions.ClientCertificate);
-
-            if (connectionOptions?.UserCertificateValidationCallback != null)
-                options.RemoteCertificateValidationCallback = connectionOptions.UserCertificateValidationCallback;
-        };
     }
 }

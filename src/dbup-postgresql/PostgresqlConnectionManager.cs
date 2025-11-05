@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using DbUp.Engine.Transactions;
@@ -15,7 +16,7 @@ public class PostgresqlConnectionManager : DatabaseConnectionManager
     /// Disallow single quotes to be escaped with a backslash (\')
     /// </summary>
     public bool StandardConformingStrings { get; set; } = true;
-
+    
     /// <summary>
     /// Creates a new PostgreSQL database connection.
     /// </summary>
@@ -44,14 +45,7 @@ public class PostgresqlConnectionManager : DatabaseConnectionManager
     /// <param name="connectionString">The PostgreSQL connection string.</param>
     /// <param name="connectionOptions">Custom options to apply on the created connection</param>
     public PostgresqlConnectionManager(string connectionString, PostgresqlConnectionOptions connectionOptions)
-        : base(new DelegateConnectionFactory(l =>
-            {
-                NpgsqlConnection databaseConnection = new NpgsqlConnection(connectionString);
-                databaseConnection.ApplyConnectionOptions(connectionOptions);
-
-                return databaseConnection;
-            }
-        ))
+        : base(new DataSourceConnectionFactory(connectionString, connectionOptions))
     {
     }
 

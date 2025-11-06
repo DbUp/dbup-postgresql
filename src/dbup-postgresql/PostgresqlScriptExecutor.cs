@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DbUp.Engine;
 using DbUp.Engine.Output;
@@ -25,12 +25,14 @@ public class PostgresqlScriptExecutor : ScriptExecutor
     public PostgresqlScriptExecutor(Func<IConnectionManager> connectionManagerFactory, Func<IUpgradeLog> log, string schema, Func<bool> variablesEnabled,
         IEnumerable<IScriptPreprocessor> scriptPreprocessors, Func<IJournal> journalFactory)
         : base(connectionManagerFactory, new PostgresqlObjectParser(), log, schema, variablesEnabled, scriptPreprocessors, journalFactory)
-    {
-    }
+        {
+        }
 
-    protected override string GetVerifySchemaSql(string schema) => $"CREATE SCHEMA IF NOT EXISTS {schema}";
+        /// <inheritdoc/>
+        protected override string GetVerifySchemaSql(string schema) => $"CREATE SCHEMA IF NOT EXISTS {schema}";
 
-    protected override void ExecuteCommandsWithinExceptionHandler(int index, SqlScript script, Action executeCommand)
+        /// <inheritdoc/>
+        protected override void ExecuteCommandsWithinExceptionHandler(int index, SqlScript script, Action executeCommand)
     {
         try
         {

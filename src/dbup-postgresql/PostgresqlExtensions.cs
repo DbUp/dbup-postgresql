@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
@@ -165,6 +165,13 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, new PostgresqlConnectionOptions());
     }
 
+    /// <summary>
+    /// Ensures that the database specified in the connection string exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="certificate">Certificate for securing connection.</param>
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions
@@ -174,6 +181,13 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
+    /// <summary>
+    /// Ensures that the database specified in the connection string exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="connectionOptions">Connection options to set SSL parameters</param>
     public static void PostgresqlDatabase(
         this SupportedDatabasesForEnsureDatabase supported, 
         string connectionString, 
@@ -292,6 +306,13 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, new PostgresqlConnectionOptions());
     }
 
+    /// <summary>
+    /// Drops the database specified in the connection string if it exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="certificate">Certificate for securing connection.</param>
     public static void PostgresqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions
@@ -301,6 +322,13 @@ public static class PostgresqlExtensions
         PostgresqlDatabase(supported, connectionString, logger, options);
     }
 
+    /// <summary>
+    /// Drops the database specified in the connection string if it exists using SSL for the connection.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="connectionOptions">Connection options to set SSL parameters</param>
     public static void PostgresqlDatabase(
         this SupportedDatabasesForDropDatabase supported,
         string connectionString,

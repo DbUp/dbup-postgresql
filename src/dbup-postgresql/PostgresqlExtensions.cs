@@ -204,7 +204,7 @@ public static class PostgresqlExtensions
     /// <param name="supported">Fluent helper type.</param>
     /// <param name="connectionString">The connection string.</param>
     /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
-    /// <param name="connectionOptions">Connection SSL to customize SSL behaviour</param>
+    /// <param name="connectionOptions">Connection options to set SSL parameters</param>
     /// <param name="owner">Role to own the new database during creation (adds 'WITH OWNER = "role"').</param>
     public static void PostgresqlDatabase(
         this SupportedDatabasesForEnsureDatabase supported,

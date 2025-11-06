@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
@@ -232,8 +232,6 @@ public static class PostgresqlExtensions
             throw new InvalidOperationException("The connection string does not specify a database name.");
         }
 
-        owner = string.IsNullOrWhiteSpace(owner) ? masterConnectionStringBuilder.Username : owner;
-
         masterConnectionStringBuilder.Database = connectionOptions.MasterDatabaseName;
 
         var logMasterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(masterConnectionStringBuilder.ConnectionString);
@@ -266,34 +264,56 @@ public static class PostgresqlExtensions
             }
         }
 
-        sqlCommandText = $"select 1 from pg_roles where rolname = \'{owner}\' limit 1;";
-        // check to see if the owner exists..
-        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+        if (!string.IsNullOrEmpty(owner))
         {
-            CommandType = CommandType.Text
-        })
-        {
-            var results = Convert.ToInt32(command.ExecuteScalar());
-
-            // if the owner role does not exist, we throw an exception.
-            if (results == 0)
+            sqlCommandText = "select exists (select 1 from pg_roles where rolname = @owner);";
+            // check to see if the owner exists..
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
             {
-                throw new InvalidOperationException($"PostgreSQL role '{owner}' does not exist.");
+                CommandType = CommandType.Text
+            })
+            {
+                command.Parameters.AddWithValue("@owner", owner);
+
+                var roleExists = (bool) command.ExecuteScalar();
+                // if the owner role does not exist, we throw an exception.
+                if (!roleExists)
+                {
+                    throw new InvalidOperationException($"PostgreSQL role '{owner}' does not exist.");
+                }
             }
+
+            using var formattedSql = new NpgsqlCommand("select format('create database %I WITH owner = %I', @databaseName, @owner);", connection);
+            formattedSql.Parameters.AddWithValue("databaseName", databaseName);
+            formattedSql.Parameters.AddWithValue("owner", owner);
+            sqlCommandText = (string)formattedSql.ExecuteScalar();
+
+            // Create the database..
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            {
+                CommandType = CommandType.Text,
+            })
+            {
+                command.ExecuteNonQuery();
+            }
+
+            logger.LogInformation(@"Created database {0} with owner {1}", databaseName, owner);
         }
-
-        sqlCommandText = $"create database \"{databaseName}\" with owner = \"{owner}\";";
-
-        // Create the database...
-        using (var command = new NpgsqlCommand(sqlCommandText, connection)
+        else
         {
-            CommandType = CommandType.Text
-        })
-        {
-            command.ExecuteNonQuery();
-        }
+            sqlCommandText = $"create database \"{databaseName}\";";
 
-        logger.LogInformation(@"Created database {0}", databaseName);
+            // Create the database...
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            {
+                CommandType = CommandType.Text
+            })
+            {
+                command.ExecuteNonQuery();
+            }
+
+            logger.LogInformation(@"Created database {0}", databaseName);
+        }  
     }
 
     /// <summary>

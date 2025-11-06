@@ -172,7 +172,6 @@ public static class PostgresqlExtensions
     /// <param name="connectionString">The connection string.</param>
     /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
     /// <param name="certificate">Certificate for securing connection.</param>
-    /// <returns></returns>
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions

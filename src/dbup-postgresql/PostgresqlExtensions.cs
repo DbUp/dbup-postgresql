@@ -264,7 +264,22 @@ public static class PostgresqlExtensions
             }
         }
 
-        if (!string.IsNullOrEmpty(owner))
+        if (string.IsNullOrEmpty(owner))
+        {
+            sqlCommandText = $"create database \"{databaseName}\";";
+
+            // Create the database...
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            {
+                CommandType = CommandType.Text
+            })
+            {
+                command.ExecuteNonQuery();
+            }
+
+            logger.LogInformation(@"Created database {0}", databaseName);
+        }
+        else
         {
             sqlCommandText = "select exists (select 1 from pg_roles where rolname = @owner);";
             // check to see if the owner exists..
@@ -275,7 +290,7 @@ public static class PostgresqlExtensions
             {
                 command.Parameters.AddWithValue("@owner", owner);
 
-                var roleExists = (bool) command.ExecuteScalar();
+                var roleExists = (bool)command.ExecuteScalar();
                 // if the owner role does not exist, we throw an exception.
                 if (!roleExists)
                 {
@@ -298,21 +313,6 @@ public static class PostgresqlExtensions
             }
 
             logger.LogInformation(@"Created database {0} with owner {1}", databaseName, owner);
-        }
-        else
-        {
-            sqlCommandText = $"create database \"{databaseName}\";";
-
-            // Create the database...
-            using (var command = new NpgsqlCommand(sqlCommandText, connection)
-            {
-                CommandType = CommandType.Text
-            })
-            {
-                command.ExecuteNonQuery();
-            }
-
-            logger.LogInformation(@"Created database {0}", databaseName);
         }  
     }
 

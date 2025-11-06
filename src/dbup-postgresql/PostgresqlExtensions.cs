@@ -298,7 +298,7 @@ public static class PostgresqlExtensions
                 }
             }
 
-            using var formattedSql = new NpgsqlCommand("select format('create database %I WITH owner = %I', @databaseName, @owner);", connection);
+            using var formattedSql = new NpgsqlCommand("select format('create database %I with owner = %I', @databaseName, @owner);", connection);
             formattedSql.Parameters.AddWithValue("databaseName", databaseName);
             formattedSql.Parameters.AddWithValue("owner", owner);
             sqlCommandText = (string)formattedSql.ExecuteScalar();

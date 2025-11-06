@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using DbUp.Engine;
 using DbUp.Engine.Output;
@@ -22,10 +22,11 @@ public class PostgresqlTableJournal : TableJournal
     /// <param name="tableName">The name of the journal table.</param>
     public PostgresqlTableJournal(Func<IConnectionManager> connectionManager, Func<IUpgradeLog> logger, string schema, string tableName)
         : base(connectionManager, logger, new PostgresqlObjectParser(), schema, tableName)
-    {
-    }
+        {
+        }
 
-    protected override IDbCommand GetInsertScriptCommand(Func<IDbCommand> dbCommandFactory, SqlScript script)
+        /// <inheritdoc/>
+        protected override IDbCommand GetInsertScriptCommand(Func<IDbCommand> dbCommandFactory, SqlScript script)
     {
         // EnableSqlRewriting is enabled by default, and needs to be explicitly disabled
         bool enableSqlRewriting = !AppContext.TryGetSwitch("Npgsql.EnableSqlRewriting", out bool enabled) || enabled;
@@ -49,16 +50,19 @@ public class PostgresqlTableJournal : TableJournal
         return command;
     }
 
+    /// <inheritdoc/>
     protected override string GetInsertJournalEntrySql(string scriptName, string applied)
     {
         return $"insert into {FqSchemaTableName} (ScriptName, Applied) values ({scriptName}, {applied})";
     }
 
+    /// <inheritdoc/>
     protected override string GetJournalEntriesSql()
     {
         return $"select ScriptName from {FqSchemaTableName} order by ScriptName";
     }
 
+    /// <inheritdoc/>
     protected override string CreateSchemaTableSql(string quotedPrimaryKeyName)
     {
         return

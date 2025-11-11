@@ -3,7 +3,7 @@ Info:         Beginning database upgrade
 Info:         Checking whether journal table exists
 DB Operation: Execute scalar command: 
 select case
-    when to_regclass('"schemaversions"') is not null then 1
+    when pg_catalog.to_regclass('"schemaversions"') is not null then 1
     else 0
 end;
 DB Operation: Dispose command
@@ -12,7 +12,7 @@ Info:         Executing Database Server script 'Script0001.sql'
 Info:         Checking whether journal table exists
 DB Operation: Execute scalar command: 
 select case
-    when to_regclass('"schemaversions"') is not null then 1
+    when pg_catalog.to_regclass('"schemaversions"') is not null then 1
     else 0
 end;
 DB Operation: Dispose command

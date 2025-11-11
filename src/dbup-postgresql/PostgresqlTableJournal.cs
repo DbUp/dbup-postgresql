@@ -82,7 +82,7 @@ public class PostgresqlTableJournal : TableJournal
 
         string sql = $@"
 select case
-    when to_regclass('{fqSchemaTableName}') is not null then 1
+    when pg_catalog.to_regclass('{fqSchemaTableName}') is not null then 1
     else 0
 end;";
 

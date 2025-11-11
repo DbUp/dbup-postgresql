@@ -4,7 +4,6 @@ using DbUp.Engine;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;
 using DbUp.Support;
-using Npgsql;
 
 namespace DbUp.Postgresql;
 
@@ -82,10 +81,10 @@ public class PostgresqlTableJournal : TableJournal
         string fqSchemaTableName = FqSchemaTableName.Replace("'", "''");
 
         string sql = $@"
-        select case
-            when to_regclass('{fqSchemaTableName}') is not null then 1
-            else 0
-        end;";
+select case
+    when to_regclass('{fqSchemaTableName}') is not null then 1
+    else 0
+end;";
 
         return sql;
     }

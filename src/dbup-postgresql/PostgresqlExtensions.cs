@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
@@ -16,7 +16,7 @@ using Npgsql;
 /// </summary>
 public static class PostgresqlExtensions
 {
-    private static readonly string pattern= @"(?i)Search\s?Path=([^;]+)";
+    private static readonly string pattern = @"(?i)Search\s?Path=([^;]+)";
     /// <summary>
     /// Creates an upgrader for PostgreSQL databases.
     /// </summary>
@@ -175,7 +175,7 @@ public static class PostgresqlExtensions
     public static void PostgresqlDatabase(this SupportedDatabasesForEnsureDatabase supported, string connectionString, IUpgradeLog logger, X509Certificate2 certificate)
     {
         var options = new PostgresqlConnectionOptions
-        { 
+        {
             ClientCertificate = certificate
         };
         PostgresqlDatabase(supported, connectionString, logger, options);
@@ -189,10 +189,29 @@ public static class PostgresqlExtensions
     /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
     /// <param name="connectionOptions">Connection options to set SSL parameters</param>
     public static void PostgresqlDatabase(
-        this SupportedDatabasesForEnsureDatabase supported, 
-        string connectionString, 
-        IUpgradeLog logger, 
+        this SupportedDatabasesForEnsureDatabase supported,
+        string connectionString,
+        IUpgradeLog logger,
         PostgresqlConnectionOptions connectionOptions
+    )
+    {
+        PostgresqlDatabase(supported, connectionString, logger, connectionOptions, null);
+    }
+
+    /// <summary>
+    /// Ensures that the database specified in the connection string exists, assigning an owner at creation time.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
+    /// <param name="connectionOptions">Connection options to set SSL parameters</param>
+    /// <param name="owner">Role to own the new database during creation (adds 'WITH OWNER = "role"').</param>
+    public static void PostgresqlDatabase(
+        this SupportedDatabasesForEnsureDatabase supported,
+        string connectionString,
+        IUpgradeLog logger,
+        PostgresqlConnectionOptions connectionOptions,
+        string owner
     )
     {
         if (supported == null) throw new ArgumentNullException("supported");
@@ -205,7 +224,7 @@ public static class PostgresqlExtensions
         if (logger == null) throw new ArgumentNullException("logger");
 
         var masterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
-        
+
         var databaseName = masterConnectionStringBuilder.Database;
 
         if (string.IsNullOrEmpty(databaseName) || databaseName.Trim() == string.Empty)
@@ -232,9 +251,9 @@ public static class PostgresqlExtensions
 
         // check to see if the database already exists..
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             var results = Convert.ToInt32(command.ExecuteScalar());
 
@@ -245,18 +264,56 @@ public static class PostgresqlExtensions
             }
         }
 
-        sqlCommandText = $"create database \"{databaseName}\";";
-
-        // Create the database...
-        using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        if (string.IsNullOrEmpty(owner))
         {
-            command.ExecuteNonQuery();
-        }
+            sqlCommandText = $"create database \"{databaseName}\";";
 
-        logger.LogInformation(@"Created database {0}", databaseName);
+            // Create the database...
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            {
+                CommandType = CommandType.Text
+            })
+            {
+                command.ExecuteNonQuery();
+            }
+
+            logger.LogInformation(@"Created database {0}", databaseName);
+        }
+        else
+        {
+            sqlCommandText = "select exists (select 1 from pg_roles where rolname = @owner);";
+            // check to see if the owner exists..
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            {
+                CommandType = CommandType.Text
+            })
+            {
+                command.Parameters.AddWithValue("@owner", owner);
+
+                var roleExists = (bool)command.ExecuteScalar();
+                // if the owner role does not exist, we throw an exception.
+                if (!roleExists)
+                {
+                    throw new InvalidOperationException($"PostgreSQL role '{owner}' does not exist.");
+                }
+            }
+
+            using var formattedSql = new NpgsqlCommand("select format('create database %I with owner = %I', @databaseName, @owner);", connection);
+            formattedSql.Parameters.AddWithValue("databaseName", databaseName);
+            formattedSql.Parameters.AddWithValue("owner", owner);
+            sqlCommandText = (string)formattedSql.ExecuteScalar();
+
+            // Create the database..
+            using (var command = new NpgsqlCommand(sqlCommandText, connection)
+            {
+                CommandType = CommandType.Text,
+            })
+            {
+                command.ExecuteNonQuery();
+            }
+
+            logger.LogInformation(@"Created database {0} with owner {1}", databaseName, owner);
+        }  
     }
 
     /// <summary>
@@ -347,7 +404,7 @@ public static class PostgresqlExtensions
 
         var masterConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
 
-        var databaseName = masterConnectionStringBuilder.Database;       
+        var databaseName = masterConnectionStringBuilder.Database;
 
         if (string.IsNullOrEmpty(databaseName) || databaseName.Trim() == string.Empty)
         {
@@ -379,9 +436,9 @@ public static class PostgresqlExtensions
 
         // check to see if the database already exists..
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             var results = Convert.ToInt32(command.ExecuteScalar());
 
@@ -396,9 +453,9 @@ public static class PostgresqlExtensions
         // prevent new connections to the database
         sqlCommandText = $"alter database \"{databaseName}\" with ALLOW_CONNECTIONS false;";
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }
@@ -408,9 +465,9 @@ public static class PostgresqlExtensions
         // terminate all existing connections to the database
         sqlCommandText = $"select pg_terminate_backend(pg_stat_activity.pid) from pg_stat_activity where pg_stat_activity.datname = \'{databaseName}\';";
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }
@@ -421,9 +478,9 @@ public static class PostgresqlExtensions
 
         // drop the database
         using (var command = new NpgsqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        {
+            CommandType = CommandType.Text
+        })
         {
             command.ExecuteNonQuery();
         }
